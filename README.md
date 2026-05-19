@@ -1,2 +1,2 @@
-# gp-ei-bayesopt-prevalidation
-Gaussian-Process / Expected-Improvement Bayesian optimization framework
+# gp-ei-bayesopt
+Gaussian-Process / Expected-Improvement Bayesian optimization framework with reproducibility checks on noisy benchmark test functions.
