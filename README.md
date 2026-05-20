@@ -1,68 +1,97 @@
-# GP-EI Bayesian Optimization Framework
+# GP-EI Bayesian Optimization Pre-Validation
 
-This repository contains a Gaussian-Process / Expected-Improvement (GP-EI) Bayesian optimization implementation for noisy, expensive black-box functions in moderate-dimensional continuous parameter spaces.
+## Purpose
 
-The implementation includes a reproducibility framework that tests algorithm behavior on synthetic benchmark functions with realistic noise characteristics and compares performance against full-factorial grid baselines at matched and larger experimental budgets.
+This repository provides a transparent pre-validation of a Gaussian-process / Expected Improvement (GP-EI) Bayesian optimization workflow for noisy three-factor response-surface optimization.
 
-## Contents
+The goal is to evaluate whether sequential Bayesian optimization can identify high-response regions with fewer experimental conditions than grid-based exploration when each experiment is resource-limited and response measurements are noisy.
+
+## What's in this repository
 
 | File | Purpose |
 |---|---|
-| `prevalidation.py` | Self-contained Python implementation: Matérn 5/2 GP, Expected Improvement acquisition, three benchmark test functions with heteroscedastic noise, BayesOpt loop, grid-search baselines, 20-replicate run harness |
-| `make_figures.py` | Generates the convergence-trajectory, GP-posterior, and summary-comparison figures from the saved results |
-| `results.json` | Raw numerical results from the 20-replicate runs |
-| `fig1_convergence.png/pdf` | Convergence trajectories across the three benchmark functions |
-| `fig2_posterior.png/pdf` | GP posterior visualization on representative runs |
-| `fig3_summary.png/pdf` | Summary efficiency comparison versus grid-search baselines |
+| `prevalidation.py` | Self-contained Python implementation: Matérn 5/2 Gaussian process, Expected Improvement acquisition, three synthetic response surfaces with heteroscedastic noise, Bayesian optimization loop, grid-search baselines, and 20-replicate simulation |
+| `make_figures.py` | Generates summary figures from the saved `results.json` file |
+| `results.json` | Raw numerical results from the 20-replicate simulation runs |
+| `fig1_convergence.png/pdf` | Figure 1: convergence trajectories |
+| `fig2_posterior.png/pdf` | Figure 2: posterior recovery visualization |
+| `fig3_summary.png/pdf` | Figure 3: summary efficiency comparison |
 
 ## Requirements
 
-Python 3.8+, NumPy >= 1.20, Matplotlib >= 3.5.
+- Python 3.8+
+- NumPy >= 1.20
+- Matplotlib >= 3.5
 
-No other dependencies are required. The code intentionally avoids SciPy, scikit-learn, BoTorch, and PyTorch so it can run in a minimal Python environment.
+No SciPy, scikit-learn, BoTorch, or PyTorch is required for this pre-validation code. The implementation intentionally uses only NumPy and Matplotlib to make the workflow transparent, auditable, and easy to reproduce in standard Python environments.
 
-## Quick reproduction (~5 minutes)
+## To reproduce
+
+From the repository folder:
 
 ```bash
-python3 prevalidation.py     # runs the optimization, prints summary, saves results.json
-python3 make_figures.py      # generates the figures from results.json
+python3 prevalidation.py
+python3 make_figures.py
 ```
 
-Expected console output:
+Expected output:
 
-```
+```text
+=== Surface: unimodal ===     True maximum (estimated): 64.96
+=== Surface: multimodal ===   True maximum (estimated): 69.97
+=== Surface: ridge ===        True maximum (estimated): 59.96
+
+SUMMARY STATISTICS — over 20 replicate runs per surface
 Surface          True max    BO (24 expts)         Grid27         Grid64
 unimodal            64.96      69.85±11.29     55.37±9.11     65.77±6.76
 multimodal          69.97      66.85±13.13     49.14±3.50     62.26±8.10
 ridge               59.96      66.82±7.17     58.52±12.30     61.48±5.18
 ```
 
-## Headline result
+## Key result
 
-GP-EI BayesOpt with **24 evaluations** (15-point Box-Behnken initial design + 3 cycles × 3 GP-EI-proposed points) matches or exceeds the performance of **4×4×4 grid search with 64 evaluations** across all three benchmark functions — a 62% reduction in evaluation budget at equivalent or better optimization quality. On the multimodal benchmark, where grid search is most vulnerable to a deceptive local maximum, GP-EI outperforms the 3×3×3 grid (27 evaluations) by 36%.
+GP-EI Bayesian optimization with **24 total experiments** (15-point Box-Behnken initialization + 3 cycles × 3 proposed points) matched or exceeded the performance of a **4×4×4 grid search with 64 experiments** across the three synthetic test surfaces. This corresponds to a 62% reduction in experimental burden at equivalent or better optimization quality.
+
+On the multimodal surface, where grid exploration is most vulnerable to missing a non-obvious optimum, GP-EI achieved a mean best observed response of 66.85 compared with 49.14 for the 3×3×3 grid.
+
+## Methodology, in brief
+
+1. **Three synthetic response surfaces** were defined in the unit cube [0, 1]^3, representing three normalized experimental input variables:
+   - *Unimodal*: smooth single off-center peak
+   - *Multimodal*: deceptive local maximum plus true global maximum in a less-obvious region
+   - *Ridge*: high-response region along a curved manifold rather than a single point
+
+2. **Noise model.** Heteroscedastic Gaussian noise was applied with coefficient of variation CV = 20% to represent experimentally realistic measurement variability.
+
+3. **GP surrogate.** A Matérn 5/2 covariance kernel was used with fixed defaults:
+   - length scale = 0.30 in normalized input space
+   - signal variance = 400
+   - noise variance = 25
+
+4. **Acquisition function.** Expected Improvement was used with exploration parameter ξ = 0.5. Acquisition maximization was performed over a 25³ candidate grid with a within-batch spacing constraint to reduce point clustering.
+
+5. **Optimization loop.** The initial design was a 15-point Box-Behnken design. Three iterative cycles were then run, with three GP-EI-proposed points per cycle, for a total budget of 24 simulated experiments.
+
+6. **Baselines.** Two grid-search baselines were evaluated using the same noise model:
+   - 3×3×3 grid = 27 experiments
+   - 4×4×4 grid = 64 experiments
+
+7. **Replication.** Each surface and method was evaluated across 20 independent runs using different random seeds. Means and standard deviations are reported.
 
 ## Interpreting noisy observed maxima
 
 Optimization performance is reported as the **best noisy observed response**, not the noiseless underlying response. For this reason, best-observed values can exceed the noiseless true maximum in some replicate runs. This reflects simulated measurement variability, not overestimation of the underlying response surface.
 
-## Methodology
+## Limitations
 
-1. **Three benchmark test functions** on the unit cube [0, 1]³:
-   - *Unimodal*: smooth single off-center peak (true max ≈ 65)
-   - *Multimodal*: deceptive local maximum with the true global maximum in a less-obvious region (true max ≈ 70)
-   - *Ridge*: optimum along a curved manifold rather than a point (true max ≈ 60)
-2. **Noise model.** Heteroscedastic Gaussian, coefficient of variation 20%, intended to mimic the order of magnitude of replicate noise typical of expensive experimental evaluations.
-3. **GP surrogate.** Matérn 5/2 covariance kernel with fixed hyperparameters (length scale ℓ = 0.30, signal variance σ_f² = 400, noise variance σ_n² = 25). In a production deployment using BoTorch, these would become priors for marginal-likelihood optimization.
-4. **Acquisition.** Expected Improvement with exploration parameter ξ = 0.5. Maximization over a 25³ = 15,625-point evaluation grid with within-batch spacing constraint (≥ 0.10 in normalized coordinates) to prevent point clustering.
-5. **Optimization loop.** Initial design = 15-point Box-Behnken. Three iterative cycles, three GP-EI-proposed points per cycle. Total: 24 simulated evaluations.
-6. **Baselines.** 3×3×3 = 27-point grid and 4×4×4 = 64-point grid with identical noise model and replication.
-7. **Replication.** 20 independent runs per benchmark with different RNG seeds; means ± SD reported.
+- The synthetic surfaces are plausible test functions for noisy three-factor optimization, but they are not derived from any specific experimental system.
+- Hyperparameters are fixed in this transparent pre-validation implementation. In a production deployment, hyperparameters can be learned from the observed experimental data using marginal-likelihood optimization.
+- The noise model uses a proportional coefficient of variation. Real experimental systems may require a different noise model or replicate-aware likelihood.
+- This pre-validation establishes that the workflow behaves as expected on noisy synthetic 3D response surfaces. It does not establish performance in any particular real-world experimental application.
 
-## Production implementation
+## Production implementation note
 
-The algorithmic specification implemented here can be deployed using BoTorch / GPyTorch for marginal-likelihood hyperparameter learning and automatic differentiation. The custom NumPy implementation in this repository is provided for transparency, auditability, and minimal-dependency reproducibility.
-
-A typical BoTorch deployment uses:
+The same algorithmic specification can be implemented in standard Bayesian optimization libraries such as BoTorch / GPyTorch:
 
 ```python
 import torch
@@ -75,16 +104,8 @@ from gpytorch.mlls import ExactMarginalLogLikelihood
 from botorch.fit import fit_gpytorch_mll
 ```
 
-## Limitations
-
-- Fixed hyperparameters are used here. A production deployment will optimize hyperparameters via marginal log-likelihood; the fixed values used here represent reasonable defaults that demonstrate correct algorithmic behavior.
-- Heteroscedastic noise is modeled as proportional to the response. A production likelihood will be re-estimated from observed replicate variance in the deployment domain.
-- The benchmark functions are designed to exercise distinct geometric features (single peak, deceptive local maximum, ridge manifold) but are not derived from any specific empirical system.
+A production implementation can add automated hyperparameter optimization, GPU acceleration, replicate-aware noise estimation, and continuous acquisition-function optimization.
 
 ## Reproducibility update
 
-This version uses repository-relative paths and application-neutral terminology. Numerical results and the algorithmic workflow are unchanged.
-
-## License
-
-MIT License.
+This public version uses repository-relative paths and application-neutral terminology. Numerical results and the algorithmic workflow are unchanged.
