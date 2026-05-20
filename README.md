@@ -1,10 +1,8 @@
 # GP-EI Bayesian Optimization Framework
 
-This repository contains a Gaussian-Process / Expected-Improvement (GP-EI) Bayesian-optimization implementation for noisy, expensive black-box functions in moderate-dimensional continuous parameter spaces.
+This repository contains a Gaussian-Process / Expected-Improvement (GP-EI) Bayesian optimization implementation for noisy, expensive black-box functions in moderate-dimensional continuous parameter spaces.
 
-The implementation includes a reproducibility framework that tests algorithm behavior on standard benchmark test functions with realistic noise characteristics, and compares performance against full-factorial grid baselines at matched and larger experimental budgets.
-
-A manuscript describing an application of this framework is in preparation.
+The implementation includes a reproducibility framework that tests algorithm behavior on synthetic benchmark functions with realistic noise characteristics and compares performance against full-factorial grid baselines at matched and larger experimental budgets.
 
 ## Contents
 
@@ -19,7 +17,9 @@ A manuscript describing an application of this framework is in preparation.
 
 ## Requirements
 
-Python 3.8+, NumPy ≥ 1.20, Matplotlib ≥ 3.5. No other dependencies required. The code intentionally avoids SciPy, scikit-learn, BoTorch, and PyTorch so it runs in any minimal Python environment.
+Python 3.8+, NumPy >= 1.20, Matplotlib >= 3.5.
+
+No other dependencies are required. The code intentionally avoids SciPy, scikit-learn, BoTorch, and PyTorch so it can run in a minimal Python environment.
 
 ## Quick reproduction (~5 minutes)
 
@@ -41,6 +41,10 @@ ridge               59.96      66.82±7.17     58.52±12.30     61.48±5.18
 
 GP-EI BayesOpt with **24 evaluations** (15-point Box-Behnken initial design + 3 cycles × 3 GP-EI-proposed points) matches or exceeds the performance of **4×4×4 grid search with 64 evaluations** across all three benchmark functions — a 62% reduction in evaluation budget at equivalent or better optimization quality. On the multimodal benchmark, where grid search is most vulnerable to a deceptive local maximum, GP-EI outperforms the 3×3×3 grid (27 evaluations) by 36%.
 
+## Interpreting noisy observed maxima
+
+Optimization performance is reported as the **best noisy observed response**, not the noiseless underlying response. For this reason, best-observed values can exceed the noiseless true maximum in some replicate runs. This reflects simulated measurement variability, not overestimation of the underlying response surface.
+
 ## Methodology
 
 1. **Three benchmark test functions** on the unit cube [0, 1]³:
@@ -54,9 +58,11 @@ GP-EI BayesOpt with **24 evaluations** (15-point Box-Behnken initial design + 3 
 6. **Baselines.** 3×3×3 = 27-point grid and 4×4×4 = 64-point grid with identical noise model and replication.
 7. **Replication.** 20 independent runs per benchmark with different RNG seeds; means ± SD reported.
 
-## Production implementation (BoTorch)
+## Production implementation
 
-The algorithmic specification implemented here is identical to the production version, which uses BoTorch (PyTorch-based) for marginal-likelihood hyperparameter learning and automatic differentiation. The custom NumPy implementation in this repository is provided for transparency, audit, and minimal-dependency reproducibility. A typical BoTorch deployment uses:
+The algorithmic specification implemented here can be deployed using BoTorch / GPyTorch for marginal-likelihood hyperparameter learning and automatic differentiation. The custom NumPy implementation in this repository is provided for transparency, auditability, and minimal-dependency reproducibility.
+
+A typical BoTorch deployment uses:
 
 ```python
 import torch
@@ -74,6 +80,10 @@ from botorch.fit import fit_gpytorch_mll
 - Fixed hyperparameters are used here. A production deployment will optimize hyperparameters via marginal log-likelihood; the fixed values used here represent reasonable defaults that demonstrate correct algorithmic behavior.
 - Heteroscedastic noise is modeled as proportional to the response. A production likelihood will be re-estimated from observed replicate variance in the deployment domain.
 - The benchmark functions are designed to exercise distinct geometric features (single peak, deceptive local maximum, ridge manifold) but are not derived from any specific empirical system.
+
+## Reproducibility update
+
+This version uses repository-relative paths and application-neutral terminology. Numerical results and the algorithmic workflow are unchanged.
 
 ## License
 
