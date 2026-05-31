@@ -106,6 +106,10 @@ from botorch.fit import fit_gpytorch_mll
 
 A production implementation can add automated hyperparameter optimization, GPU acceleration, replicate-aware noise estimation, and continuous acquisition-function optimization.
 
+## v2.0 — Aim 3 power simulation
+
+Version 2.0 adds an operating-characteristic simulation framework for the NIH R21 Aim 3 BayesOpt-versus-RSM superiority validation, contributed by Yiqun Jiang (UCLA Department of Medicine). Code and outputs live in the `aim3_power/` subfolder; see `aim3_power/README.md` for methodology and reproducibility notes. The original v1.0 pre-validation framework (this file) is retained unchanged.
+
 ## Reproducibility update
 
 This public version uses repository-relative paths and application-neutral terminology. Numerical results and the algorithmic workflow are unchanged.
