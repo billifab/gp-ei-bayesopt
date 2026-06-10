@@ -14,7 +14,7 @@ New files in this version:
 
 ## Scope of the power simulation
 
-The simulation evaluates the operating characteristics of the proposed two-stage RSM-plus-BayesOpt workflow when applied to a three-factor PEMF parameter space under realistic donor-level and residual biological variability. Four canonical response-surface geometries are tested:
+The simulation evaluates the operating characteristics of the proposed two-stage RSM-plus-BayesOpt workflow when applied to a three-factor parameter space under realistic donor-level and residual biological variability. Four canonical response-surface geometries are tested:
 
 - **Unimodal**: smooth surface with a single off-center peak.
 - **Multimodal**: two-peak surface with a deceptive local maximum and a true global maximum.
