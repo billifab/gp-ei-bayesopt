@@ -2,19 +2,17 @@
 
 **Version 2.0** (2026-06)
 
-This deposit accompanies the NIH R21 application *A Platform for Data-Efficient Optimization of Biophysical Stimulation Parameters in Regenerative Cell Engineering* (Billi, contact PI; Péault, co-PI; Jiang, co-I).
-
 ## What is new in version 2.0
 
-Version 2.0 adds the Aim 3 power-analysis simulation framework and its production operating-characteristic outputs. The original Version 1 contents (GP-EI pre-validation on three synthetic 3D response surfaces, used as the methodological proof of concept cited in §3.1 of the Research Strategy) are retained unchanged.
+Version 2.0 adds the power-analysis simulation framework and its production operating-characteristic outputs. The original Version 1 contents (GP-EI pre-validation on three synthetic 3D response surfaces, used as the methodological proof of concept cited in §3.1 of the Research Strategy) are retained unchanged.
 
 New files in this version:
 
-- `aim3_simulation_power.py` — self-contained Python implementation of the Aim 3 power simulation. Authored by Yiqun Jiang; integrated into the application as the operating-characteristic backbone for the >10% superiority margin in the Bayesian optimization validation phase.
+- `aim3_simulation_power.py` — self-contained Python implementation of the power simulation. Authored by Yiqun Jiang; integrated into the application as the operating-characteristic backbone for the >10% superiority margin in the Bayesian optimization validation phase.
 - `aim3_power_results.json` — full per-replicate records across the 48 simulated scenarios (four response-surface geometries × four within-donor residual coefficients of variation × three between-donor coefficients of variation, 500 Monte Carlo replicates each).
 - `aim3_power_summary.csv` — operating-characteristic summary table corresponding to Supplementary Table S1 of the Research Strategy.
 
-## Scope of the Aim 3 power simulation
+## Scope of the power simulation
 
 The simulation evaluates the operating characteristics of the proposed two-stage RSM-plus-BayesOpt workflow when applied to a three-factor PEMF parameter space under realistic donor-level and residual biological variability. Four canonical response-surface geometries are tested:
 
@@ -39,12 +37,12 @@ The simulation depends only on `numpy`. No external Bayesian-optimization or sta
 
 The Gaussian process surrogate uses a Matérn 5/2 covariance kernel with fixed hyperparameters (length scale 0.30 on the [0, 1] unit cube; signal variance 400; default observation noise variance 25), with condition-specific noise variances estimated from donor-level replicate responses where available. Expected Improvement with exploration constant ξ = 0.5 is used as the acquisition function and evaluated over a dense 15×15×15 candidate grid; near-duplicate candidates (within Euclidean distance 0.07 of observed points or 0.10 of within-batch selections) are suppressed.
 
-Fixed hyperparameters are appropriate for operating-characteristic analysis, where the goal is to characterize workflow performance under realistic scenarios rather than to optimize the surrogate model itself. The full production implementation in Aim 3 will use marginal-likelihood optimization of the GP hyperparameters via the BoTorch framework, as described in the Research Strategy §4.3 Computational methodology.
+Fixed hyperparameters are appropriate for operating-characteristic analysis, where the goal is to characterize workflow performance under realistic scenarios rather than to optimize the surrogate model itself. The full production implementation will use marginal-likelihood optimization of the GP hyperparameters via the BoTorch framework, as described in the Research Strategy §4.3 Computational methodology.
 
 ## Authorship and contributions
 
-- **Fabrizio Billi, PhD** (UCLA Orthopaedic Surgery, Billi Laboratory) — original GP-EI pre-validation framework (Version 1.0), project conception, repository maintenance.
-- **Yiqun Jiang, PhD** (UCLA Department of Medicine) — Aim 3 power simulation framework, operating-characteristic analysis (Version 2.0).
+- **Fabrizio Billi, PhD** (UCLA) — original GP-EI pre-validation framework (Version 1.0), project conception, repository maintenance.
+- **Yiqun Jiang, PhD** (UCLA) — Power simulation framework, operating-characteristic analysis (Version 2.0).
 
 ## License and citation
 
