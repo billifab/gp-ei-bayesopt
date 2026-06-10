@@ -108,7 +108,7 @@ A production implementation can add automated hyperparameter optimization, GPU a
 
 ## v2.0 — Aim 3 power simulation
 
-Version 2.0 adds an operating-characteristic simulation framework for the NIH R21 Aim 3 BayesOpt-versus-RSM superiority validation, contributed by Yiqun Jiang (UCLA Department of Medicine). Code and outputs live in the `aim3_power/` subfolder; see `aim3_power/README.md` for methodology and reproducibility notes. The original v1.0 pre-validation framework (this file) is retained unchanged.
+Version 2.0 adds an operating-characteristic simulation framework BayesOpt-versus-RSM superiority validation, contributed by Yiqun Jiang (UCLA Department of Medicine). Code and outputs live in the `aim3_power/` subfolder; see `aim3_power/README.md` for methodology and reproducibility notes. The original v1.0 pre-validation framework (this file) is retained unchanged.
 
 ## Reproducibility update
 
